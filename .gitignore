@@ -1,0 +1,10 @@
+# Created by .ignore support plugin (hsz.mobi)
+.gradle/
+.idea/
+data/
+out/
+
+ui/node_modules
+ui/npm-debug.log
+ui/.**
+ui/ui.iml
