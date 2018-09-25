@@ -18,11 +18,9 @@ repositories {
 //https://dzone.com/articles/angular-2-and-spring-boot-development-environment
 
 dependencies {
-    //    compile 'org.springframework.boot:spring-boot-starter-webflux'
-    compile 'org.springframework.boot:spring-boot-starter-web'
+    compile 'org.springframework.boot:spring-boot-starter-webflux'
     compile 'org.springframework.boot:spring-boot-starter'
-    compile "io.projectreactor:reactor-core:3.0.3.RELEASE"
-    compile 'com.jakewharton.retrofit:retrofit2-reactor-adapter:2.1.0'
+    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     compile 'com.squareup.retrofit2:retrofit:2.4.0'
     compile 'com.squareup.retrofit2:converter-jackson:2.4.0'
     compile 'com.squareup.retrofit2:converter-jaxb:2.4.0'

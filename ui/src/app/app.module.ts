@@ -1,13 +1,14 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { ChartsModule } from 'ng2-charts';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
+import {ChartsModule} from 'ng2-charts';
 
 
-
-import { AppComponent } from './app.component';
+import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app.routing.module';
 import {PlotComponent} from './plot/plot.component';
 import {MainComponent} from './main/main.component';
+import {HttpClient, HttpClientModule} from '@angular/common/http';
+import {RestService} from './service/rest.service';
 
 
 @NgModule({
@@ -19,9 +20,14 @@ import {MainComponent} from './main/main.component';
   imports: [
     BrowserModule,
     ChartsModule,
-    AppRoutingModule
+    AppRoutingModule,
+    HttpClientModule
   ],
-  providers: [],
+  providers: [
+    RestService,
+    HttpClient
+  ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}

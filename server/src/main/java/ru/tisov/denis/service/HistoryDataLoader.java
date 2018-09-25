@@ -14,18 +14,20 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+
+import static ru.tisov.denis.utils.Utils.ex;
 
 @Service
 public class HistoryDataLoader {
 
     private final MoexDao moexDao;
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private final String storagePath = "/Users/denis/Documents/Java/Idea_Projects/stock-analytic/data";
+    private final ObjectMapper objectMapper;
+    public static final String STORAGE_PATH = "/Users/denis/Documents/Java/Idea_Projects/stock-analytic/data";
     private final int BATCH_SIZE = 100;
 
-    public HistoryDataLoader(MoexDao moexDao) {
+    public HistoryDataLoader(MoexDao moexDao, ObjectMapper objectMapper) {
         this.moexDao = moexDao;
+        this.objectMapper = objectMapper;
     }
 
     public void load(String securityId) {
@@ -53,23 +55,17 @@ public class HistoryDataLoader {
                         throw new RuntimeException(e);
                     }
                 })
-                .doAfterTerminate(() -> close(writer))
+                .doAfterTerminate(() -> {
+                    close(writer);
+                    System.out.println(securityId + " loaded");
+                })
                 .subscribe(ex(writer::write));
     }
 
-    private <T, E extends Exception> Consumer<T> ex(ConsumerWithException<T, E> fe) {
-        return arg -> {
-            try {
-                fe.apply(arg);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        };
-    }
 
     private BufferedWriter getBufferedWriter(String securityId) {
         try {
-            File outputFile = new File(storagePath + "/" + securityId + ".json");
+            File outputFile = new File(STORAGE_PATH + "/" + securityId + ".json");
             return new BufferedWriter(new FileWriter(outputFile));
         } catch (IOException e) {
             e.printStackTrace();
