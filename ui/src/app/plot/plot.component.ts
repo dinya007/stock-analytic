@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {RestService} from '../service/rest.service';
-import {Quote} from '../dto/quote';
+import {Plot} from '../dto/plot';
 
 
 @Component({
@@ -61,15 +61,22 @@ export class PlotComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.restService.getArray<Quote>('/api/plots').subscribe(quotes => {
-      console.log(quotes);
-      const data: Number[] = [];
+    this.restService.getArray<Plot>('/api/plots').subscribe(plots => {
+      console.log(plots);
 
-      for (const quote of quotes) {
-        this.plotLabels.push(quote.tradeDate);
-        data.push(quote.close);
+      if (plots.length !== 0) {
+        for (const point of plots[0].points) {
+          this.plotLabels.push(point.date);
+        }
       }
-      this.plotData.push({data: data, label: 'SBER'});
+
+      for (const plot of plots) {
+        const data: Number[] = [];
+        for (const point of plot.points) {
+          data.push(point.value);
+        }
+        this.plotData.push({data: data, label: plot.name});
+      }
     });
   }
 

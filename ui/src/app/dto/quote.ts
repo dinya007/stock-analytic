@@ -4,7 +4,7 @@ export interface Quote {
   tradeDate: Date;
   name: String;
   securityId: String;
-  numTrades: Number;
+  numTrades: Date;
   value: Number;
   open: Number;
   low: Number;
