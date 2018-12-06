@@ -10,11 +10,11 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.Arrays;
 
-public class SimpleMovingAverageTest {
+public class DoubleSimpleMovingAverageTest {
 
     @Test
     public void testMovingAverage() {
-        SimpleMovingAverage simpleMovingAverage = new SimpleMovingAverage(null);
+        DoubleSimpleMovingAverage doubleSimpleMovingAverage = new DoubleSimpleMovingAverage(null);
 
         Quote quote1 = new Quote();
         quote1.setClose(BigDecimal.valueOf(5.3));
@@ -45,7 +45,7 @@ public class SimpleMovingAverageTest {
         quote7.setTradeDate(LocalDate.of(2018, Month.JANUARY, 7));
 
 
-        Plot plot = simpleMovingAverage.movingAverage(Arrays.asList(quote1, quote2, quote3, quote4, quote5, quote6, quote7), 4);
+        Plot plot = doubleSimpleMovingAverage.movingAverage(Arrays.asList(quote1, quote2, quote3, quote4, quote5, quote6, quote7), 4);
 
         Assert.assertEquals("Экспоненциальная скользязая средняя за 4 дней", plot.getName());
         Assert.assertNull(plot.getPoints().get(0).getValue());

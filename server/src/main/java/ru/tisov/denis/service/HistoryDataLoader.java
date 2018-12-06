@@ -6,13 +6,16 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.SynchronousSink;
 import ru.tisov.denis.dao.MoexDao;
+import ru.tisov.denis.dto.Instrument;
 import ru.tisov.denis.dto.Quote;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 import static ru.tisov.denis.utils.Utils.ex;
@@ -30,17 +33,28 @@ public class HistoryDataLoader {
         this.objectMapper = objectMapper;
     }
 
-    public void load(String securityId) {
-        BufferedWriter writer = getBufferedWriter(securityId);
+    public void load(Instrument instrument) {
+        if (loaded(instrument)) {
+            System.out.println(instrument.getSecurityId() + " already loaded");
+            instrument.setLoaded(true);
+            return;
+        }
+        final long startTime = System.currentTimeMillis();
+        BufferedWriter writer = getBufferedWriter(instrument.getSecurityId());
         Flux
-                .range(0, BATCH_SIZE)
-                .map(number -> number * 100)
+                .range(0, Integer.MAX_VALUE)
+                .map(number -> number * BATCH_SIZE)
                 .handle((BiConsumer<Integer, SynchronousSink<List<Quote>>>) (start, synchronousSink) -> {
                     try {
-                        List<Quote> quotes = moexDao.getHistoryData(securityId, start).execute().body().getHistoryData().getRows().getQuotes();
+                        List<Quote> quotes = moexDao.getHistoryData(instrument.getSecurityId(), LocalDate.now(), start, BATCH_SIZE).execute().body().getHistoryData().getRows().getQuotes();
                         if (quotes != null) {
                             synchronousSink.next(quotes);
                         } else {
+                            try {
+                                TimeUnit.SECONDS.sleep(2);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
                             synchronousSink.complete();
                         }
                     } catch (IOException e) {
@@ -57,11 +71,16 @@ public class HistoryDataLoader {
                 })
                 .doAfterTerminate(() -> {
                     close(writer);
-                    System.out.println(securityId + " loaded");
+                    instrument.setLoaded(true);
+                    System.out.println(instrument.getSecurityId() + " loaded by " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime) + " seconds");
                 })
                 .subscribe(ex(writer::write));
     }
 
+
+    private boolean loaded(Instrument instrument) {
+        return new File(STORAGE_PATH + "/" + instrument.getSecurityId() + ".json").exists();
+    }
 
     private BufferedWriter getBufferedWriter(String securityId) {
         try {

@@ -10,22 +10,23 @@ import ru.tisov.denis.service.QuoteService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @Service
-public class SimpleMovingAverage implements Strategy {
+public class DoubleSimpleMovingAverage implements StrategyPlot {
 
     private final QuoteService quoteService;
 
-    public SimpleMovingAverage(QuoteService quoteService) {
+    public DoubleSimpleMovingAverage(QuoteService quoteService) {
         this.quoteService = quoteService;
     }
 
     @Override
     public Flux<Plot> getPlots(String securityId) {
-        Flux<Quote> quotes = quoteService.getQuotes(securityId);
+        Flux<Quote> quotes = quoteService.getQuotes(securityId).cache();
         return Flux.mergeSequential(
                 Arrays.asList(
                         quotes.collectList().map(quotesList -> {
@@ -35,9 +36,25 @@ public class SimpleMovingAverage implements Strategy {
                             }
                             return new Plot(securityId, plotPoints);
                         }),
-                        movingAverage(quotes.collectList(), 50),
-                movingAverage(quotes.collectList(), 100))
+                        getFastMovingAverage(quotes),
+                        getSlowMovingAverage(quotes))
         );
+    }
+
+    public Action recommendAction(String securityId, LocalDate date) {
+        Flux<Quote> quotes = quoteService.getQuotes(securityId);
+        Mono<Plot> slowMovingAverage = getSlowMovingAverage(quotes);
+        Mono<Plot> fastMovingAverage = getFastMovingAverage(quotes);
+
+        return null;
+    }
+
+    private Mono<Plot> getSlowMovingAverage(Flux<Quote> quotes) {
+        return movingAverage(quotes.collectList(), 100);
+    }
+
+    private Mono<Plot> getFastMovingAverage(Flux<Quote> quotes) {
+        return movingAverage(quotes.collectList(), 50);
     }
 
     private Mono<Plot> movingAverage(Mono<List<Quote>> quotesMono, int n) {
@@ -64,7 +81,7 @@ public class SimpleMovingAverage implements Strategy {
             }
 
 
-            return new Plot(String.format("Экспоненциальная скользязая средняя за %d дней", n), plotPoints);
+            return new Plot(String.format("Простая скользящая средняя за %d дней", n), plotPoints);
         });
 
     }

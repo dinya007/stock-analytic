@@ -1,0 +1,15 @@
+<plotly-plot [data]="graph.data" [layout]="graph.layout" [useResizeHandler]="true"
+             (relayout)="relayout($event)"></plotly-plot>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm">
+      <select class="form-control input-sm" (change)="drawPlot($event.target.value)">
+        <option value="0">--All--</option>
+        <option *ngFor="let instrument of instruments" value={{instrument}}>
+          {{instrument}}
+        </option>
+      </select>
+    </div>
+  </div>
+</div>
